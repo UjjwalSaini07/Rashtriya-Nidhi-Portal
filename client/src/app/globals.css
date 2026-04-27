@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.flag-stripe {
+  height: 4px;
+  background: linear-gradient(to right, #FF6B00 33.33%, #FFFFFF 33.33% 66.66%, #138808 66.66%);
+}
+
+.status-badge {
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
