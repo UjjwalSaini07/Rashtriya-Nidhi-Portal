@@ -1,0 +1,48 @@
+---
+name: Feature Request
+about: Suggest an idea for this project
+title: "[FEATURE] "
+labels: enhancement
+assignees: ''
+
+---
+
+## Feature Summary
+Brief description of the feature you'd like to see implemented.
+
+## Problem Statement
+What problem does this feature solve? What pain point does it address?
+
+## Proposed Solution
+Describe your proposed solution in detail.
+
+## Alternative Solutions
+Describe any alternative solutions or features you've considered.
+
+## User Impact
+Which user roles would benefit from this feature?
+- [ ] Central Admin
+- [ ] Central Reviewer
+- [ ] State Admin
+- [ ] State Officer
+- [ ] Contractor/Supplier/Mediator
+- [ ] Auditor
+- [ ] Public
+
+## Technical Considerations
+Any technical requirements or constraints?
+
+## Implementation Plan
+High-level steps needed to implement this feature:
+1.
+2.
+3.
+
+## Additional Context
+Add any other context, screenshots, or examples about the feature request here.
+
+## Priority
+- [ ] Critical (essential for system operation)
+- [ ] High (important for user experience)
+- [ ] Medium (nice to have)
+- [ ] Low (future consideration)
