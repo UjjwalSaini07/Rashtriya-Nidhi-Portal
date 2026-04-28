@@ -11,6 +11,26 @@ const TEMP_LOGIN = {
   passkey: 'ADMIN123'
 };
 
+function base64UrlEncode(obj) {
+  const str = typeof obj === 'string' ? obj : JSON.stringify(obj);
+  return btoa(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function generateTempToken(userData) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    userId: 'temp-admin-001',
+    nicId: userData.nicId,
+    role: userData.role,
+    iat: now,
+    exp: now + (8 * 3600)
+  };
+  const headerB64 = base64UrlEncode(JSON.stringify(header));
+  const payloadB64 = base64UrlEncode(JSON.stringify(payload));
+  return `${headerB64}.${payloadB64}.dev-temp-token-sig`;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [showPwd, setShowPwd] = useState(false);
@@ -34,11 +54,14 @@ export default function LoginPage() {
       const dummyUser = {
         nicId: TEMP_LOGIN.nicId,
         name: 'Temporary Admin',
-        role: 'ADMIN',
+        role: 'CENTRAL_ADMIN',
+        stateCode: 'CENTRAL',
+        email: 'temp.admin@gov.in',
         department: 'Testing',
-        isTemp: true
+        isTemp: true,
+        isActive: true
       };
-      const dummyToken = 'temp-jwt-token-for-testing-only';
+      const dummyToken = generateTempToken(dummyUser);
       localStorage.setItem('accessToken', dummyToken);
       localStorage.setItem('user', JSON.stringify(dummyUser));
       router.push('/dashboard');
