@@ -1,7 +1,22 @@
 {
   "name": "rnp-client",
   "version": "1.0.0",
+  "description": "Frontend client for Rashtriya Nidhi Portal - Government Fund Allocation & Transparency System",
   "private": true,
+  "author": {
+    "name": "Ujjwal Saini",
+    "url": "https://ujjwalsaini.vercel.app/",
+    "email": "ujjwalsaini0007@gmail.com"
+  },
+  "homepage": "https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal/issues"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

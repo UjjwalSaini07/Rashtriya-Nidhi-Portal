@@ -1,7 +1,22 @@
 {
   "name": "rnp-server",
   "version": "1.0.0",
+  "description": "Backend server for Rashtriya Nidhi Portal - Government Fund Allocation & Transparency System",
   "main": "src/index.js",
+  "author": {
+    "name": "Ujjwal Saini",
+    "url": "https://ujjwalsaini.vercel.app/",
+    "email": "ujjwalsaini0007@gmail.com"
+  },
+  "homepage": "https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal/issues"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
