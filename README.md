@@ -5,8 +5,8 @@
 🏛️ A secure digital platform for transparent government fund allocation — enabling states to raise fund bills, route payments to verified contractors and suppliers, detect fraud via AI scanning, enforce dual digital signatures, and maintain a tamper-proof blockchain audit trail eliminating corruption. 🔒
 
 ## Stack
-- **Frontend**: Next.js 14 + JSX + Tailwind CSS
-- **Backend**: Node.js + Express.js (plain JS)
+- **Client**: Next.js 14 + JSX + Tailwind CSS
+- **Server**: Node.js + Express.js (plain JS)
 - **Database**: MongoDB (Mongoose)
 - **Cache/Sessions**: Redis
 - **Auth**: JWT + bcrypt + OTP (MSG91)
@@ -19,8 +19,8 @@
 
 ### 1. Configure Environment
 ```bash
-cp backend/.env.example backend/.env      # Fill in all values
-cp frontend/.env.example frontend/.env.local
+cp server/.env.example server/.env      # Fill in all values
+cp client/.env.example client/.env.local
 ```
 
 ### 2. Run with Docker (recommended)
@@ -30,16 +30,16 @@ docker-compose up --build
 
 ### 3. Run without Docker (development)
 ```bash
-# Terminal 1 — Backend
-cd backend && npm install && npm run dev
+# Terminal 1 — Server
+cd server && npm install && npm run dev
 
-# Terminal 2 — Frontend
-cd frontend && npm install && npm run dev
+# Terminal 2 — Client
+cd client && npm install && npm run dev
 ```
 
 ### 4. Create First Admin User (first time only)
 ```bash
-cd backend && npm run seed
+cd server && npm run seed
 ```
 
 ### 5. Open Portal
