@@ -78,4 +78,45 @@ cd server && npm run seed
 - Account lockout after 5 failed login attempts
 - State-level data isolation for state users
 
-Rest Readme I update Later....!!!
+## Documentation
+
+- [📚 Full Documentation](docs/)
+- [🏗️ Architecture Overview](docs/architecture.md)
+- [🔌 API Reference](docs/api-endpoints.md)
+- [🗄️ Database Schema](docs/database-schema.md)
+- [🔐 Authentication Guide](docs/authentication.md)
+- [🛡️ Security Features](docs/security.md)
+- [🚀 Deployment Guide](docs/deployment.md)
+- [👥 User Roles](docs/user-roles.md)
+- [💻 Development Guide](docs/development.md)
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](.github/CONTRIBUTING.md) for details.
+
+## Author
+
+**Ujjwal Saini**
+- Website: https://ujjwalsaini.vercel.app/
+- GitHub: [@UjjwalSaini07](https://github.com/UjjwalSaini07)
+- Twitter: [@UjjwalSx007](https://twitter.com/UjjwalSx007)
+- LinkedIn: [ujjwalsaini07](https://linkedin.com/in/ujjwalsaini07)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 📧 **Email**: ujjwalsaini0007+rnp@gmail.com
+- 🐛 **Issues**: [GitHub Issues](https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/UjjwalSaini07/Rashtriya-Nidhi-Portal/discussions)
+
+## Sponsors
+
+Support this project by becoming a sponsor! [GitHub Sponsors](https://github.com/sponsors/UjjwalSaini07)
+
+
+⭐ **Star this repository** if you find it helpful!
+
+REST README I UPDATE LATER....
