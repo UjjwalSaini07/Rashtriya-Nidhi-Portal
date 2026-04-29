@@ -111,9 +111,9 @@ jobs:
       - name: Run ESLint Security
         run: |
           cd server
-          npx eslint src --ext .js --config .eslintrc.security.js
+          npx eslint src --ext .js
           cd ../client
-          npx eslint src --ext .js,.jsx,.ts,.tsx --config .eslintrc.security.js
+          npx eslint src --ext .js,.jsx,.ts,.tsx
 
   container-scan:
     runs-on: ubuntu-latest
