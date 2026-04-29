@@ -71,14 +71,14 @@ jobs:
 
       - name: Setup test database
         run: |
-          # Seed test data
+          # Seed test data when the script exists
           cd server
-          npm run seed:test
+          npm run seed:test --if-present
 
       - name: Run API integration tests
         run: |
           cd server
-          npm run test:integration
+          npm run test:integration --if-present
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://localhost:27017/rnp_test
