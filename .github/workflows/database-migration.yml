@@ -42,7 +42,12 @@ jobs:
         id: find-migrations
         run: |
           # Find new migration files
-          MIGRATION_FILES=$(find server/src/migrations -name "*.js" -newer .git/refs/heads/main 2>/dev/null || find server/src/migrations -name "*.js")
+          if [ -d "server/src/migrations" ]; then
+            MIGRATION_FILES=$(find server/src/migrations -name "*.js" -newer .git/refs/heads/main 2>/dev/null || find server/src/migrations -name "*.js")
+          else
+            echo "::notice::Migration directory 'server/src/migrations' was not found; skipping migration file discovery."
+            MIGRATION_FILES=""
+          fi
           echo "files=$MIGRATION_FILES" >> $GITHUB_OUTPUT
 
       - name: Validate migration scripts
