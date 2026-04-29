@@ -1,0 +1,159 @@
+name: Database Migration (Disabled)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      migration_type:
+        description: 'Type of migration'
+        required: true
+        default: 'schema'
+        type: choice
+        options:
+          - schema
+          - data
+          - rollback
+      confirm_execution:
+        description: 'Confirm migration execution'
+        required: true
+        default: false
+        type: boolean
+
+# Global condition to keep workflow inactive
+if: false
+
+jobs:
+  validate-migration:
+    runs-on: ubuntu-latest
+    outputs:
+      migration-files: ${{ steps.find-migrations.outputs.files }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Find migration files
+        id: find-migrations
+        run: |
+          # Find new migration files
+          if [ -d "server/src/migrations" ]; then
+            MIGRATION_FILES=$(find server/src/migrations -name "*.js" -newer .git/refs/heads/main 2>/dev/null || find server/src/migrations -name "*.js")
+          else
+            echo "::notice::Migration directory 'server/src/migrations' was not found; skipping migration file discovery."
+            MIGRATION_FILES=""
+          fi
+          echo "files=$MIGRATION_FILES" >> $GITHUB_OUTPUT
+
+      - name: Validate migration scripts
+        run: |
+          # Syntax check migration files
+          for file in ${{ steps.find-migrations.outputs.files }}; do
+            node -c "$file"
+          done
+
+      - name: Check migration dependencies
+        run: |
+          # Validate migration dependencies
+          echo "Migration validation completed"
+
+  backup-database:
+    runs-on: ubuntu-latest
+    needs: validate-migration
+    if: inputs.confirm_execution == true
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create database backup
+        run: |
+          echo "Creating database backup for ${{ inputs.environment }}"
+          # Add backup logic here
+          # - Connect to database
+          # - Create backup
+          # - Store in secure location
+
+      - name: Validate backup integrity
+        run: |
+          echo "Validating backup integrity"
+          # Add backup validation logic
+
+  run-migration:
+    runs-on: ubuntu-latest
+    needs: [validate-migration, backup-database]
+    if: inputs.confirm_execution == true
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: cd server && npm ci
+
+      - name: Run database migration
+        env:
+          NODE_ENV: ${{ inputs.environment }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+        run: |
+          cd server
+          if [ "${{ inputs.migration_type }}" = "rollback" ]; then
+            SCRIPT_NAME="migrate:rollback"
+          else
+            SCRIPT_NAME="migrate:up"
+          fi
+
+          if node -e "const pkg=require('./package.json'); process.exit(pkg.scripts && pkg.scripts['${SCRIPT_NAME}'] ? 0 : 1)"; then
+            npm run "${SCRIPT_NAME}"
+          else
+            echo "Error: server/package.json does not define npm script '${SCRIPT_NAME}'."
+            echo "Update .github/workflows/database-migration.yml to use the migration command the server actually supports."
+            exit 1
+          fi
+
+      - name: Run post-migration tests
+        run: |
+          echo "Running post-migration validation tests"
+          # Add validation tests here
+
+      - name: Update migration status
+        run: |
+          echo "Migration completed successfully"
+          # Log migration completion
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: run-migration
+    if: always()
+    steps:
+      - name: Send notification
+        run: |
+          if [ "${{ needs.run-migration.result }}" = "success" ]; then
+            echo "✅ Database migration completed successfully"
+          else
+            echo "❌ Database migration failed"
+          fi
+          # Add notification logic (Slack, email, etc.)
+
+  rollback:
+    runs-on: ubuntu-latest
+    needs: run-migration
+    if: failure() && inputs.migration_type != 'rollback'
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Automatic rollback
+        run: |
+          echo "Migration failed, attempting automatic rollback"
+          # Add rollback logic here

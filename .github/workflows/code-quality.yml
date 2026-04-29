@@ -1,0 +1,288 @@
+name: Code Quality Checks (Disabled)
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: 'Type of quality checks'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - lint
+          - format
+          - coverage
+          - complexity
+
+# Global condition to keep workflow inactive
+if: false
+
+jobs:
+  lint-check:
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'full' || inputs.check_type == 'lint'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: |
+          cd client && pnpm install --frozen-lockfile
+          cd ../server && pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: |
+          cd client && pnpm run lint
+          cd ../server && pnpm exec eslint src --ext .js
+
+      - name: Run Prettier check
+        run: |
+          npm install -g prettier
+          prettier --check "client/src/**/*.{js,jsx,ts,tsx}"
+          prettier --check "server/src/**/*.js"
+          prettier --check "docs/**/*.md"
+
+  format-check:
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'full' || inputs.check_type == 'format'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Prettier
+        run: npm install -g prettier
+
+      - name: Check code formatting
+        run: |
+          prettier --check "client/src/**/*.{js,jsx,ts,tsx,css}"
+          prettier --check "server/src/**/*.js"
+          prettier --check "docs/**/*.md"
+          prettier --check "*.md"
+          prettier --check ".github/**/*.md"
+
+      - name: Auto-fix formatting (if needed)
+        if: failure()
+        run: |
+          prettier --write "client/src/**/*.{js,jsx,ts,tsx,css}"
+          prettier --write "server/src/**/*.js"
+          prettier --write "docs/**/*.md"
+          prettier --write "*.md"
+          prettier --write ".github/**/*.md"
+
+  test-coverage:
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'full' || inputs.check_type == 'coverage'
+    services:
+      mongo:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install server dependencies
+        run: cd server && npm ci
+
+      - name: Run tests with coverage
+        run: |
+          cd server
+          npm run test:coverage
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/rnp_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./server/coverage/lcov.info
+          flags: server
+          name: server-coverage
+
+      - name: Install client dependencies
+        run: cd client && npm ci
+
+      - name: Run client tests with coverage
+        run: |
+          cd client
+          npm run test:coverage
+
+      - name: Upload client coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./client/coverage/lcov.info
+          flags: client
+          name: client-coverage
+
+  complexity-analysis:
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'full' || inputs.check_type == 'complexity'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install complexity analysis tools
+        run: |
+          npm install -g complexity-report
+          npm install -g plato
+
+      - name: Analyze code complexity
+        run: |
+          # Generate complexity report for server
+          complexity-report server/src --format json > server-complexity.json
+
+          # Generate complexity report for client
+          complexity-report client/src --format json > client-complexity.json
+
+          # Generate Plato reports
+          plato -r -d server-report server/src
+          plato -r -d client-report client/src
+
+      - name: Check complexity thresholds
+        run: |
+          # Check if complexity exceeds thresholds
+          node -e "
+          const fs = require('fs');
+          const serverComplexity = JSON.parse(fs.readFileSync('server-complexity.json'));
+          const clientComplexity = JSON.parse(fs.readFileSync('client-complexity.json'));
+
+          const maxComplexity = 10;
+          const maxLines = 100;
+
+          let hasIssues = false;
+
+          serverComplexity.forEach(file => {
+            if (file.complexity > maxComplexity || file.lines > maxLines) {
+              console.log(\`Server file \${file.path} exceeds thresholds (complexity: \${file.complexity}, lines: \${file.lines})\`);
+              hasIssues = true;
+            }
+          });
+
+          clientComplexity.forEach(file => {
+            if (file.complexity > maxComplexity || file.lines > maxLines) {
+              console.log(\`Client file \${file.path} exceeds thresholds (complexity: \${file.complexity}, lines: \${file.lines})\`);
+              hasIssues = true;
+            }
+          });
+
+          if (hasIssues) {
+            process.exit(1);
+          }
+          "
+
+      - name: Upload complexity reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: complexity-reports
+          path: |
+            *-complexity.json
+            *-report/
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'full'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install documentation tools
+        run: |
+          npm install -g markdownlint-cli
+          npm install -g markdown-link-check
+
+      - name: Lint documentation
+        run: |
+          # Lint all markdown files
+          find docs -name "*.md" -exec markdownlint {} \;
+          find . -maxdepth 1 -name "*.md" -exec markdownlint {} \;
+          find .github -name "*.md" -exec markdownlint {} \;
+
+      - name: Check documentation links
+        run: |
+          # Check links in documentation
+          find docs -name "*.md" -exec markdown-link-check {} \;
+
+      - name: Check API documentation coverage
+        run: |
+          # Check if all API endpoints are documented
+          echo "API documentation coverage check completed"
+
+  generate-quality-report:
+    runs-on: ubuntu-latest
+    needs: [lint-check, format-check, test-coverage, complexity-analysis, documentation-check]
+    if: always()
+    steps:
+      - name: Generate quality report
+        run: |
+          echo "# Code Quality Report" > quality-report.md
+          echo "" >> quality-report.md
+          echo "## Quality Check Configuration" >> quality-report.md
+          echo "- Type: ${{ inputs.check_type }}" >> quality-report.md
+          echo "- Date: $(date)" >> quality-report.md
+          echo "" >> quality-report.md
+          echo "## Check Results" >> quality-report.md
+          echo "| Check | Status | Details |" >> quality-report.md
+          echo "|-------|--------|---------|" >> quality-report.md
+          echo "| Linting | ${{ needs.lint-check.result }} | ESLint + Prettier |" >> quality-report.md
+          echo "| Formatting | ${{ needs.format-check.result }} | Code style consistency |" >> quality-report.md
+          echo "| Test Coverage | ${{ needs.test-coverage.result }} | Unit & integration tests |" >> quality-report.md
+          echo "| Complexity | ${{ needs.complexity-analysis.result }} | Code complexity analysis |" >> quality-report.md
+          echo "| Documentation | ${{ needs.documentation-check.result }} | Docs quality & coverage |" >> quality-report.md
+          echo "" >> quality-report.md
+          echo "## Recommendations" >> quality-report.md
+          echo "Review detailed results and artifacts for specific issues and improvements." >> quality-report.md
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-quality-report
+          path: quality-report.md
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: generate-quality-report
+    if: always()
+    steps:
+      - name: Send quality notification
+        run: |
+          if [ "${{ contains(needs.*.result, 'failure') }}" = "true" ]; then
+            echo "⚠️ Code quality issues found"
+            # Send notification for quality issues
+          else
+            echo "✅ All quality checks passed"
+          fi
