@@ -6,7 +6,6 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-2xl mx-auto text-center">
-        {/* Logo and Header */}
         <div className="mb-8">
           <img
             src="/RnpLogo.png"
@@ -19,14 +18,12 @@ export default function NotFound() {
           <p className="text-gray-600">Government of India</p>
         </div>
 
-        {/* 404 */}
         <div className="mb-8">
           <h2 className="text-8xl font-bold text-gray-300 mb-4">
             404
           </h2>
         </div>
 
-        {/* Message */}
         <div className="mb-6">
           <h3 className="text-2xl font-bold text-gray-800 mb-3">
             Page Not Found
@@ -35,7 +32,6 @@ export default function NotFound() {
             The page you're looking for doesn't exist in our portal.
           </p>
 
-          {/* Sanskrit Shloka */}
           <div className="bg-gradient-to-r from-orange-50 to-blue-50 border border-orange-200/50 rounded-xl p-4 mx-auto max-w-md shadow-md">
             <blockquote className="text-base font-semibold text-gray-700 italic mb-1">
               "सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः"
@@ -46,7 +42,6 @@ export default function NotFound() {
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           <Link
             href="/"
@@ -63,7 +58,6 @@ export default function NotFound() {
           </button>
         </div>
 
-        {/* Support */}
         <div className="text-center">
           <p className="text-sm text-gray-500 mb-2">Need help? Contact support</p>
           <div className="flex justify-center gap-4">
@@ -83,7 +77,6 @@ export default function NotFound() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-8 pt-6 border-t border-gray-200">
           <p className="text-gray-500 text-sm">
             © 2026 Rashtriya Nidhi Portal - Government of India

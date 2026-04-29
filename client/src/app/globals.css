@@ -10,3 +10,65 @@
 .status-badge {
   @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
 }
+
+/* Custom Scrollbar - Matching UI Theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 8px;
+  box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.3),
+              inset -1px -1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  box-shadow: inset 1px 1px 4px rgba(255, 255, 255, 0.4),
+              inset -1px -1px 4px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+/* 404 Page Animations */
+@keyframes particle-float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0.1;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotate(90deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-30px) translateX(-10px) rotate(180deg);
+    opacity: 0.2;
+  }
+  75% {
+    transform: translateY(-15px) translateX(15px) rotate(270deg);
+    opacity: 0.4;
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-particle-float {
+  animation: particle-float 15s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+.status-badge {
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
