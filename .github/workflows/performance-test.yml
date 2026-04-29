@@ -1,0 +1,168 @@
+name: Performance Testing (Disabled)
+
+# 🚫 WORKFLOW DISABLED - DO NOT RUN AUTOMATICALLY
+on:
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of performance test'
+        required: true
+        default: 'load'
+        type: choice
+        options:
+          - load
+          - stress
+          - spike
+          - volume
+          - endurance
+      duration:
+        description: 'Test duration in minutes'
+        required: false
+        default: '5'
+        type: string
+      concurrency:
+        description: 'Number of concurrent users'
+        required: false
+        default: '10'
+        type: string
+      target_url:
+        description: 'Target URL for testing'
+        required: true
+        default: 'http://localhost:3000'
+        type: string
+
+# Global condition to keep workflow inactive
+if: false
+
+jobs:
+  setup-infrastructure:
+    runs-on: ubuntu-latest
+    outputs:
+      test-environment-url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy test environment
+        id: deploy
+        run: |
+          echo "Deploying test environment"
+          # Deploy application to test environment
+          # Return test URL
+          echo "url=http://test-environment.com" >> $GITHUB_OUTPUT
+
+  performance-test:
+    runs-on: ubuntu-latest
+    needs: setup-infrastructure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        run: |
+          # Install k6 load testing tool
+          sudo apt update
+          sudo apt install -y wget
+          wget https://github.com/grafana/k6/releases/download/v0.45.0/k6-v0.45.0-linux-amd64.tar.gz
+          tar -xzf k6-v0.45.0-linux-amd64.tar.gz
+          sudo mv k6-v0.45.0-linux-amd64/k6 /usr/local/bin/
+
+      - name: Create test script
+        run: |
+          cat > performance-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+
+          export const options = {
+            stages: [
+              { duration: '1m', target: ${{ inputs.concurrency }} }, // Ramp up
+              { duration: '${{ inputs.duration }}m', target: ${{ inputs.concurrency }} }, // Sustained load
+              { duration: '1m', target: 0 }, // Ramp down
+            ],
+            thresholds: {
+              http_req_duration: ['p(95)<500'], // 95% of requests should be below 500ms
+              http_req_failed: ['rate<0.1'], // Error rate should be below 10%
+            },
+          };
+
+          export default function () {
+            const response = http.get('${{ inputs.target_url }}');
+            check(response, {
+              'status is 200': (r) => r.status === 200,
+              'response time < 500ms': (r) => r.timings.duration < 500,
+            });
+            sleep(1);
+          }
+          EOF
+
+      - name: Run performance test
+        run: |
+          k6 run --out json=results.json performance-test.js
+
+      - name: Analyze results
+        run: |
+          # Analyze test results
+          echo "Performance test completed"
+          cat results.json | jq '.metrics.http_req_duration.values.avg'
+          cat results.json | jq '.metrics.http_req_failed.values.rate'
+
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: results.json
+
+  lighthouse-audit:
+    runs-on: ubuntu-latest
+    needs: setup-infrastructure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Lighthouse
+        run: |
+          npm install -g lighthouse
+          sudo apt update
+          sudo apt install -y google-chrome-stable
+
+      - name: Run Lighthouse audit
+        run: |
+          lighthouse ${{ needs.setup-infrastructure.outputs.test-environment-url }} \
+            --output json \
+            --output html \
+            --output-path ./lighthouse-results
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v3
+        with:
+          name: lighthouse-results
+          path: ./lighthouse-results.*
+
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [performance-test, lighthouse-audit]
+    if: always()
+    steps:
+      - name: Cleanup test environment
+        run: |
+          echo "Cleaning up test environment"
+          # Add cleanup logic here
+
+      - name: Generate report
+        run: |
+          echo "# Performance Test Report" > report.md
+          echo "" >> report.md
+          echo "## Test Configuration" >> report.md
+          echo "- Type: ${{ inputs.test_type }}" >> report.md
+          echo "- Duration: ${{ inputs.duration }} minutes" >> report.md
+          echo "- Concurrency: ${{ inputs.concurrency }} users" >> report.md
+          echo "- Target: ${{ inputs.target_url }}" >> report.md
+          echo "" >> report.md
+          echo "## Results" >> report.md
+          echo "See uploaded artifacts for detailed results." >> report.md
+
+      - name: Upload report
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: report.md
