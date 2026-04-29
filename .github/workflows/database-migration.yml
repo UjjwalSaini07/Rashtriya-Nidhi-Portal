@@ -110,9 +110,17 @@ jobs:
         run: |
           cd server
           if [ "${{ inputs.migration_type }}" = "rollback" ]; then
-            npm run migrate:rollback
+            SCRIPT_NAME="migrate:rollback"
           else
-            npm run migrate:up
+            SCRIPT_NAME="migrate:up"
+          fi
+
+          if node -e "const pkg=require('./package.json'); process.exit(pkg.scripts && pkg.scripts['${SCRIPT_NAME}'] ? 0 : 1)"; then
+            npm run "${SCRIPT_NAME}"
+          else
+            echo "Error: server/package.json does not define npm script '${SCRIPT_NAME}'."
+            echo "Update .github/workflows/database-migration.yml to use the migration command the server actually supports."
+            exit 1
           fi
 
       - name: Run post-migration tests
