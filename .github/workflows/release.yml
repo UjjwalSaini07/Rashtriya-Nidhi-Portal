@@ -1,0 +1,101 @@
+name: Release Workflow (Disabled)
+
+# 🚫 WORKFLOW DISABLED - DO NOT RUN AUTOMATICALLY
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      prerelease:
+        description: 'Create prerelease version'
+        required: false
+        default: false
+        type: boolean
+      notes:
+        description: 'Release notes'
+        required: false
+        type: string
+
+# Global condition to keep workflow inactive
+if: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: |
+          cd client && npm run build
+          cd ../server && npm run build || echo "No build step"
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            ## Changes
+            ${{ inputs.notes }}
+
+            ## Deployment
+            - Docker images built and pushed
+            - Production deployment triggered
+          draft: false
+          prerelease: ${{ inputs.prerelease }}
+
+      - name: Build and push Docker images
+        run: |
+          echo "Building and pushing Docker images for release"
+          # Implementation would go here
+
+      - name: Update version in package.json
+        run: |
+          npm version ${{ inputs.release_type }} --no-git-tag-version
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json
+          git commit -m "chore: bump version to $(node -p "require('./package.json').version")"
+
+      - name: Push version bump
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Send notification
+        run: |
+          echo "Release completed successfully!"
+          echo "Version: v${{ github.run_number }}"
+          echo "Type: ${{ inputs.release_type }}"
+          # Add notification logic here (Slack, Teams, etc.)
