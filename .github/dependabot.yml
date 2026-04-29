@@ -1,0 +1,165 @@
+# 🚫 DEPENDABOT DISABLED - DO NOT RUN AUTOMATICALLY
+# ==================================================
+# Dependabot is currently DISABLED to prevent automatic dependency updates.
+#
+# TO ACTIVATE DEPENDABOT:
+# 1. Remove the 'if: false' conditions from each update section
+# 2. Configure appropriate schedules (weekly/monthly intervals)
+# 3. Set up reviewers and assignees for PRs
+# 4. Test with one ecosystem first (npm client)
+# 5. Review ignore rules for major version updates
+# ==================================================
+
+version: 2
+updates:
+  # DISABLED: Enable version updates for npm (client)
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "UjjwalSaini07"
+    assignees:
+      - "UjjwalSaini07"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "client"
+    ignore:
+      # Ignore major version updates for React (handle manually)
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      # Ignore Next.js major updates
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+    # DISABLED: Remove this line to enable
+    if: false
+
+  # DISABLED: Enable version updates for server npm
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "UjjwalSaini07"
+    assignees:
+      - "UjjwalSaini07"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "server"
+    ignore:
+      # Ignore major version updates for Express
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major"]
+      # Ignore MongoDB driver major updates
+      - dependency-name: "mongoose"
+        update-types: ["version-update:semver-major"]
+    # DISABLED: Remove this line to enable
+    if: false
+
+  # DISABLED: Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "UjjwalSaini07"
+    assignees:
+      - "UjjwalSaini07"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # DISABLED: Remove this line to enable
+    if: false
+
+  # DISABLED: Enable version updates for Docker (client)
+  - package-ecosystem: "docker"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "UjjwalSaini07"
+    assignees:
+      - "UjjwalSaini07"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "client"
+    # DISABLED: Remove this line to enable
+    if: false
+
+  # DISABLED: Enable version updates for Docker (server)
+  - package-ecosystem: "docker"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "UjjwalSaini07"
+    assignees:
+      - "UjjwalSaini07"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "server"
+    # DISABLED: Remove this line to enable
+    if: false
+
+  # DISABLED: Enable version updates for Docker Compose
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "1"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "UjjwalSaini07"
+    assignees:
+      - "UjjwalSaini07"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker-compose"
+    # DISABLED: Remove this line to enable
+    if: false
