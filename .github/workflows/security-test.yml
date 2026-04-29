@@ -143,11 +143,17 @@ jobs:
           format: 'sarif'
           output: 'trivy-client-results.sarif'
 
-      - name: Upload Trivy results
+      - name: Upload Trivy server results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-server-results.sarif,trivy-client-results.sarif'
+          sarif_file: 'trivy-server-results.sarif'
+
+      - name: Upload Trivy client results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-client-results.sarif'
 
   api-security-test:
     runs-on: ubuntu-latest
